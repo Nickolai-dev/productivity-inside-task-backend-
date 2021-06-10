@@ -1,0 +1,99 @@
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Sindy Sanders
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+12345678910
+--WebAppBoundary--
+
+###
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Gendo Ikari
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+getintotherobot
+--WebAppBoundary--
+
+###
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+William Shakespeare
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+asdfghjk
+--WebAppBoundary--
+
+###
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Luis Kerrol
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+kjhgfds
+--WebAppBoundary--
+
+###
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Standford University
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+university
+--WebAppBoundary--
+
+###
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Jo Johnson
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+jo
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+John Doe
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+12345
+--WebAppBoundary--
+
+###

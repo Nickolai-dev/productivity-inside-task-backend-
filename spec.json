@@ -1,3 +1,30 @@
 {
-  "": ""
+  "openapi": "3.0.3",
+  "info": {
+    "version": "0.0.0alpha",
+    "title": "Recipes social site",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [],
+  "paths": {
+    "/auth": {
+      "post": {
+        "description": "authorization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "422": {
+            "description": "Parameters invalid"
+          },
+          "400":{
+            "description": "Incorrect user or password"
+          }
+        }
+      }
+    }
+  }
 }
