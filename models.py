@@ -1,9 +1,11 @@
+# encoding: utf-8
 import re
+import pymongo
 
 
 class User:
     def __init__(self, **kwargs):
-        self.id = kwargs.get('id')
+        self.userId = kwargs.get('userId')
         self.nickname = kwargs.get('nickname')
         self.status = kwargs.get('status', 'active')
         self.favorites = kwargs.get('favorites', [])
@@ -14,8 +16,8 @@ class User:
         def is_valid_favorite():
             return True
         assert all([
-            type(self.id) == int,
-            re.match(r'^\w+$', self.nickname),
+            type(self.userId) == int,
+            re.match(r'^\w+[\w\ ]*\w+$', self.nickname),
             self.status in ['active', 'locked'],
             (type(self.favorites) == list and
              all(list(map(is_valid_favorite, self.favorites)))),
@@ -39,3 +41,39 @@ class Recipe:
 
     def validate(self):
         pass
+
+
+class Database:
+    _client = None
+    _users = None
+    _recipes = None
+
+    @staticmethod
+    def client():
+        if not Database._client:
+            Database._client = pymongo.MongoClient()
+        return Database._client
+
+    @staticmethod
+    def users_collection():
+        if not Database._users:
+            Database._users = Database.client().database.users
+        return Database._users
+
+    @staticmethod
+    def recipes_collection():
+        if not Database._recipes:
+            Database._recipes = Database.client().database.recipes
+        return Database._recipes
+
+    @staticmethod
+    def get_user(**kwargs):
+        return Database.users_collection().find_one(kwargs)
+
+    @staticmethod
+    def get_recipe(**kwargs):
+        pass
+
+    @staticmethod
+    def get_free_user_id():
+        assert 0  # TODO
