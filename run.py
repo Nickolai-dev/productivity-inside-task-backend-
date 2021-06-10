@@ -49,6 +49,16 @@ async def session_generate(request):
     }, status=200)
 
 
+@protect
+async def logout(request):
+    session = await aiohttp_session.get_session(request)
+    session.invalidate()
+    return web.json_response({
+        'name': 'OK',
+        'message': 'logged out'
+    }, status=204)
+
+
 async def hello(request):
     print(request)
     with open('./spec.json') as fp:
@@ -78,6 +88,7 @@ async def make_app():
         web.get('/', hello),
         web.get('/favicon.ico', favicon),
         web.post('/auth', session_generate),
+        web.post('/logout', logout),
         web.post('/test', test),
     ])
     return app
