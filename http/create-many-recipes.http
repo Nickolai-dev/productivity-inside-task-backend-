@@ -1,0 +1,675 @@
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Jo Johnson
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+jo
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/WaterPouringGlass_iS1172707826-1.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+simple
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+transparent
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+A glass of water
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+A glass of the purest clear water
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Fill empty glass with water from decanter or water tap.
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Enjoy the rest of your day!
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+bakery
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Bread
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+>(^o^)<
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Give flover
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+bake it in water of glass
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Seems, it doesent work
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Senator Armstrong
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+jack
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+morning
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+healthyfood
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Mother of all omelettes
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Making a mother of all omelettes can`t fret over every egg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Buy 24 eggs
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+***k every egg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Burn all the **ing eggs
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_4"
+
+Serve with beacon or toast
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/omelette.png
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+first course
+--WebAppBoundary--
+
+###
+
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Gordon Ramsy
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+actuallygoodfood
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+fish
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+salty
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Fresh salmon
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Fresh salmon with boiled potatos
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Give raw salmon and salt it for 24 hours
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Peel and boil 6 potatos, dill to taste
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Serve with lemon or onion
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/fresh-salmon-on-potatoes.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+chicken
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+roasted
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Roasted corn chicken
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Roasted chicken stuffed with corn
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Cut onion, fry it and mix with corn
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Flay chicken and stuff
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Serve with vegetables
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/roasted-chicken.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+morning
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+healthyfood
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Gordon Ramsay herb omelette
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Omelette with herbs
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Blend 6 eggs together, add herbs. Add salt and shrimps to taste
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Fry on low heat til ready
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Serve with onion
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/herb-omelette.PNG
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+first course
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Lyel Lipton
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+12345
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+simple
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Tea
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Just tea
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Boil water, no matter how
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Brew tea by adding tea bag or tea strainer with fresh tea
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+drink
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+John Doe
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+12345
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+meat
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Sandwitch
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Sandwitch with beacon
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Cut bread
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Cut beacon
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Join them together
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_4"
+
+Add lettuce to taste
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/Vegetable-Pizza-Sandwich-featured.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Standford University
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+university
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+circle
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Pizza
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Pizza with salami
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Make dough, fold it by circle somehow
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Cut salami, mushrooms, tomatoes and onion
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Put ingredients on a la tortilla
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_4"
+
+Bake on 180C by 20min
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Gendo Ikari
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+getintotherobot
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+circle
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Pizza florentina
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Pizza with rucolla
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Make dough, fold it by circle somehow
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Cut tomatoes, onion, broccoli and boiled eggs
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Put ingredients on a la tortilla; serve with rucolla
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_4"
+
+Bake on 180C by 20min
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/external-content.duckduckgo.com.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Luis Kerrol
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+kjhgfds
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+shrooms
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Sauteed mushrooms
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Sauted mushrooms with mashed garlic
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Cut some shrooms
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Saute with spices on low heat
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Mash garlic
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/7f88a30099836d67042263d8d4738073.png
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+William Shakespeare
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+asdfghjk
+--WebAppBoundary--
+
+###
+
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+soup
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Soup
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Soup
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Add water, add potato, add anything
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Boil
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Profit
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/sweet-potato-quinoa-soup-picture.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+soup
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Sindy Sanders
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+12345678910
+--WebAppBoundary--
+
+###
+
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+burger
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+meat
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_hashtag"
+
+bread
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_title"
+
+Burger
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_description"
+
+Simple burder
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_1"
+
+Cut bun by half
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_2"
+
+Put meatball in the middle
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_step_3"
+
+Profit
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_image"
+
+< ./img/impossible_burg_tobz.jpg
+--WebAppBoundary
+Content-Disposition: form-data; name="recipe_type"
+
+second course
+--WebAppBoundary--
+
+###

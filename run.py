@@ -174,7 +174,7 @@ async def recipe_create(request):
         return RequestValidator.error_response(errors)
     session = await aiohttp_session.get_session(request)
     user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
-    image_bytes = data.get('recipe_img')
+    image_bytes = data.get('recipe_image')
     recipe_options = {
         'author_id': user.user_id,
         'author': user.nickname,
@@ -249,7 +249,7 @@ async def explore_recipes(request):
     get_from, get_to = int(request.query.get('from', '0')), int(request.query.get('to', '10'))
     skip, limit = get_from, get_to - get_from
     limit = limit if limit > 0 else 1
-    sort_opt, filter_opt = None, {}
+    sort_opt, filter_opt = RequestValidator.sort_filter_options(data)
     cursor = Database.recipes_collection().find(
         filter_opt,
         projection=['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',

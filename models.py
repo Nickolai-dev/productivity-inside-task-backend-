@@ -78,6 +78,7 @@ class Recipe:
         assert all([
             type(self.author_id) is int,
             re.match(r'^[\w\d]+[\w\d ]*[\w\d]+$', self.title),
+            self.type in ['other', 'drink', 'salad', 'first course', 'second course', 'soup', 'dessert']
         ])
 
 

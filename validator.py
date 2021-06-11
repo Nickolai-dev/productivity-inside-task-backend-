@@ -1,5 +1,7 @@
 # encoding: utf-8
 from aiohttp import web
+import pymongo
+import re
 
 
 class RequestValidator:
@@ -57,3 +59,27 @@ class RequestValidator:
             'message': 'you missed some required fields',
             'errors': errors
         }, status=422)
+
+    @staticmethod
+    def sort_filter_options(post_data):
+        sort_opts = {
+            'title': [('title', pymongo.ASCENDING)],
+            'likes': [('likes_total', pymongo.ASCENDING)],
+            'date_ascending': [('date', pymongo.ASCENDING)],
+            'date_descending': [('date', pymongo.DESCENDING)],
+        }[post_data.get('sort_by')]
+        filter_opts = {}
+        if post_data.get('type_filter'):
+            filter_opts.update({'type': post_data.get('type_filter').decode('utf-8')})
+        if post_data.get('title_filter'):
+            filter_opts.update({'title': {
+                '$regex': re.compile(post_data.get('title_filter').decode('utf-8'), re.IGNORECASE)}})
+        if post_data.get('author_filter'):
+            filter_opts.update({'title': {
+                '$regex': re.compile(post_data.get('author_filter').decode('utf-8'), re.IGNORECASE)}})
+        filter_hashtags = list(filter(lambda hashtag: hashtag, post_data.getall('hashtag_filter', [])))
+        if filter_hashtags:
+            filter_opts.update({'hashtags': {'$in': filter_hashtags}})
+        if post_data.get('image_filter'):
+            filter_opts.update({'image_bytes': {'$ne': None}})
+        return sort_opts, filter_opts
