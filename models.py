@@ -71,7 +71,7 @@ class Recipe:
         self.hashtags = kwargs.get('hashtags', [])
         self.likes = kwargs.get('likes', [])
         self.likes_total = kwargs.get('likes_total', 0)
-        self.image_blob = kwargs.get('image_bytes', None)
+        self.image_bytes = kwargs.get('image_bytes', None)
         self.validate()
 
     def validate(self):

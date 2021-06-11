@@ -241,7 +241,35 @@ async def block_recipe(request):
 
 @protect
 async def explore_recipes(request):
-    return web.json_response({})
+    session = await aiohttp_session.get_session(request)
+    data = await request.post()
+    admin = Database.users_collection().find_one({'user_id': session['user_id']}).get('isAdmin')
+    all_recipes_count = Database.recipes_collection().count_documents(
+        ({'status': 'active'} if admin else {}))  # admin can see locked
+    get_from, get_to = int(request.query.get('from', '0')), int(request.query.get('to', '10'))
+    skip, limit = get_from, get_to - get_from
+    limit = limit if limit > 0 else 1
+    sort_opt, filter_opt = None, {}
+    cursor = Database.recipes_collection().find(
+        filter_opt,
+        projection=['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
+                    'likes', 'likes_total', 'image_bytes'],
+        sort=sort_opt, skip=skip, limit=limit)
+    recipes_list = list(map(lambda item: dict(filter(lambda item: item[0] in [
+        'author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
+        'likes', 'likes_total', 'image_bytes'], item.items())), cursor))
+
+    def encode_imagebytes(recipe):
+        recipe['image_base64_encoded_bytes'] = base64.encodebytes(
+            recipe['image_bytes']).decode('utf-8') if recipe['image_bytes'] else None
+        del recipe['image_bytes']
+    list(map(encode_imagebytes, recipes_list))
+    return web.json_response({
+        'name': 'OK',
+        'message': 'list of filtered and sorted recipes{0}'.format('; (if you are admin you can see locked)' if admin else ''),
+        'collection': recipes_list,
+        'total_recipes_count': all_recipes_count
+    })
 
 
 async def hello(request):
@@ -270,11 +298,11 @@ async def make_app():
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
         web.get(r'/profile/{user_id:\d+}', user_profile),
         web.get('/peoples', explore_peoples),
-        web.get('/explore-recipes', explore_recipes),
-        web.put('/recipe/create', recipe_create),
-        web.delete(r'/recipe/{recipe_id:\d+}/delete', recipe_delete),
-        web.put(r'/recipe/{recipe_id:\d+}/update', recipe_update),
-        web.post(r'/recipe/{recipe_id:\d+}/like', recipe_like),
+        web.put('/recipes/create', recipe_create),
+        web.post('/recipes/explore', explore_recipes),
+        web.delete(r'/recipes/{recipe_id:\d+}/delete', recipe_delete),
+        web.put(r'/recipes/{recipe_id:\d+}/update', recipe_update),
+        web.post(r'/recipes/{recipe_id:\d+}/like', recipe_like),
         web.post('/admin/block-user', block_user),
         web.post('/admin/block-recipe', block_recipe),
     ])

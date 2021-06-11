@@ -1,0 +1,24 @@
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Jo Johnson
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+jo
+--WebAppBoundary--
+
+###
+
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+
+--WebAppBoundary--
+###

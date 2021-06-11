@@ -13,7 +13,7 @@ jo
 
 ###
 
-PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipe/create
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
@@ -48,7 +48,7 @@ Enjoy the rest of your day!
 
 ###
 
-PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipe/create
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
