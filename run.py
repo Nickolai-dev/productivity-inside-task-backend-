@@ -2,7 +2,7 @@
 from aiohttp import web
 import json
 import hashlib
-from models import User, Recipe, Database
+from models import User, Recipe, Database, DatabaseUpdateException
 from validator import RequestValidator
 
 import time
@@ -68,27 +68,36 @@ async def delete_user(request):
 
 async def sign_in(request):
     data = await request.post()
-    nickname, errors = RequestValidator.validate('nickname', data, [])
-    password, errors = RequestValidator.validate('password', data, errors)
-    is_new, user = Database.create_user(nickname, password)
-    if is_new:
-        return web.json_response({
-            'name': 'Created',
-            'message': 'User {0} created successfully'.format(nickname)
-        }, status=201)
-    else:
+    nickname, errors = RequestValidator.validate_single_string('nickname', data, [])
+    password, errors = RequestValidator.validate_single_string('password', data, errors)
+    user = Database.users_collection().find_one({'nickname': nickname})
+    if errors:
+        return RequestValidator.error_response(errors)
+    if user:
         return web.json_response({
             'name': 'OK',
             'message': 'User {0} already exists'.format(nickname)
         }, status=200)
+    try:
+        user = User(nickname=nickname, password=password)
+    except AssertionError:
+        return web.json_response({
+            'name': 'User validation failed',
+            'message': 'nickname does not match syntax, nickname must consist of latin letters, digits and spaces'
+        }, status=422)
+    Database.users_collection().insert_one(user.__dict__)
+    return web.json_response({
+        'name': 'Created',
+        'message': 'User {0} created successfully'.format(nickname)
+    }, status=201)
 
 
 async def session_generate(request):
     data = await request.post()
-    nickname, errors = RequestValidator.validate('nickname', data, [])
-    password, errors = RequestValidator.validate('password', data, errors)
-    if not (password and nickname):
-        return web.json_response(errors, status=422)
+    nickname, errors = RequestValidator.validate_single_string('nickname', data, [])
+    password, errors = RequestValidator.validate_single_string('password', data, errors)
+    if errors:
+        return RequestValidator.error_response(errors)
     crypt_password = User.encrypt_password(password)
     user_with_nickname = Database.users_collection().find_one({'nickname': nickname})
     if (not user_with_nickname) or user_with_nickname['crypt_password'] != crypt_password:
@@ -155,6 +164,86 @@ async def explore_peoples(request):
     return web.json_response(response, status=200)
 
 
+@protect
+async def recipe_create(request):
+    data = await request.post()
+    recipe_title, errors = RequestValidator.validate_single_string('recipe_title', data, [])
+    recipe_description, errors = RequestValidator.validate_single_string('recipe_description', data, errors)
+    recipe_steps, errors = RequestValidator.validate_recipe_steps(data, errors)
+    if errors:
+        return RequestValidator.error_response(errors)
+    session = await aiohttp_session.get_session(request)
+    user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
+    image_bytes = data.get('recipe_img')
+    recipe_options = {
+        'author_id': user.user_id,
+        'author': user.nickname,
+        'image_bytes': bytes(image_bytes) if image_bytes else None,
+        'hashtags': RequestValidator.validate_array_string('recipe_hashtag', data, [], optional=True) or [],
+        'type': RequestValidator.validate_single_string('recipe_type', data, optional=True) or 'other',
+        'title': recipe_title,
+        'description': recipe_description,
+        'steps': recipe_steps
+    }
+    try:
+        recipe = Recipe(**recipe_options)
+    except AssertionError:
+        return web.json_response({
+            'name': 'Recipe validation failed',
+            'message': 'maybe title does not match syntax; title must consist of latin letters, digit and spaces'
+        }, status=422)
+    try:
+        Database.recipes_collection().insert_one(recipe.__dict__)
+        user.add_recipe(recipe.recipe_id)
+    except DatabaseUpdateException as e:
+        Database.recipes_collection().delete_one({'recipe_id': recipe.recipe_id})
+        return web.json_response({
+            'name': 'Something went wrong',
+            'message': 'error when adding recipe to db and rewriting user stats: run.py -> recipe_create'
+        }, status=500)
+    return web.json_response({
+        'name': 'Created',
+        'message': 'new recipe {0} successfully created by user {1}'.format(recipe_title, user.nickname)
+    }, status=201)
+
+
+@protect
+async def recipe_delete(request):
+    return web.json_response({})
+
+
+@protect
+async def recipe_update(request):
+    return web.json_response({})
+
+
+@protect
+async def recipe_like(request):
+    return web.json_response({})
+
+
+@protect
+async def get_recipe(request):
+    return web.json_response({})
+
+
+@protect
+@admin_only
+async def block_user(request):
+    return web.json_response({})
+
+
+@protect
+@admin_only
+async def block_recipe(request):
+    return web.json_response({})
+
+
+@protect
+async def explore_recipes(request):
+    return web.json_response({})
+
+
 async def hello(request):
     print(request)
     with open('./spec.json') as fp:
@@ -180,7 +269,14 @@ async def make_app():
         web.put('/signin', sign_in),
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
         web.get(r'/profile/{user_id:\d+}', user_profile),
-        web.get('/peoples', explore_peoples)
+        web.get('/peoples', explore_peoples),
+        web.get('/explore-recipes', explore_recipes),
+        web.put('/recipe/create', recipe_create),
+        web.delete(r'/recipe/{recipe_id:\d+}/delete', recipe_delete),
+        web.put(r'/recipe/{recipe_id:\d+}/update', recipe_update),
+        web.post(r'/recipe/{recipe_id:\d+}/like', recipe_like),
+        web.post('/admin/block-user', block_user),
+        web.post('/admin/block-recipe', block_recipe),
     ])
     return app
 

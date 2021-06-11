@@ -3,16 +3,21 @@ import re
 import pymongo
 import hashlib
 import random
+import time
 
+
+class DatabaseUpdateException(Exception):
+    pass
 
 class User:
     _PASSWORD_SALT = 'super secret'
 
     def __init__(self, **kwargs):
-        self.user_id = kwargs.get('user_id', Database.get_free_user_id())
+        self.user_id = kwargs.get('user_id', Database.get_free_id(Database.users_collection()))
         self.nickname = kwargs.get('nickname')
         self.status = kwargs.get('status', 'active')
         self.favorites = kwargs.get('favorites', [])
+        self.likes_total = kwargs.get('likes_total', 0)
         self.recipes = kwargs.get('recipes', [])
         self.recipes_total = kwargs.get('recipes_total', len(self.recipes))
         password = kwargs.get('password', None)
@@ -21,6 +26,20 @@ class User:
         self.isAdmin = False
         self.validate()
 
+    def add_recipe(self, recipe_id):
+        try:
+            Database.users_collection().update_one({'user_id': self.user_id}, [
+                {'$set': {'recipes': {'$concatArrays': ['$recipes', [recipe_id]]}}}
+            ])
+            Database.users_collection().update_one({'user_id': self.user_id}, {
+                '$inc': {'recipes_total': 1}
+            })
+        except Exception as e:
+            print(e)
+            raise DatabaseUpdateException
+        self.recipes_total += 1
+        self.recipes.append(recipe_id)
+
     @staticmethod
     def encrypt_password(password):
         return hashlib.md5(''.join([User._PASSWORD_SALT, password]).encode('utf-8')).hexdigest()
@@ -28,7 +47,7 @@ class User:
     def validate(self):
         assert all([
             type(self.user_id) == int,
-            re.match(r'^\w+[\w ]*\w+$', self.nickname),
+            re.match(r'^[\w\d]+[\w\d ]*[\w\d]+$', self.nickname),
             self.status in ['active', 'locked'],
             (type(self.favorites) == list and
              all(list(map(lambda x: type(x) is int, self.favorites)))),
@@ -40,20 +59,26 @@ class User:
 
 class Recipe:
     def __init__(self, **kwargs):
-        self.authorId = kwargs.get('authorId')
-        self.date = kwargs.get('date')
-        self.name = kwargs.get('name')
+        self.recipe_id = kwargs.get('recipe_id', Database.get_free_id(Database.recipes_collection()))
+        self.author_id = kwargs.get('author_id')
+        self.author = kwargs.get('author')
+        self.date = kwargs.get('date', time.time())
+        self.title = kwargs.get('title', '')
         self.type = kwargs.get('type', 'other')
-        self.description = kwargs.get('description')
-        self.steps = kwargs.get('steps')
+        self.description = kwargs.get('description', '')
+        self.steps = kwargs.get('steps', [])
         self.status = kwargs.get('status', 'active')
-        self.hashTags = kwargs.get('hashTags', [])
+        self.hashtags = kwargs.get('hashtags', [])
         self.likes = kwargs.get('likes', [])
-        self.imageBlob = kwargs.get('imageBlob')
+        self.likes_total = kwargs.get('likes_total', 0)
+        self.image_blob = kwargs.get('image_bytes', None)
         self.validate()
 
     def validate(self):
-        pass
+        assert all([
+            type(self.author_id) is int,
+            re.match(r'^[\w\d]+[\w\d ]*[\w\d]+$', self.title),
+        ])
 
 
 class Database:
@@ -80,17 +105,8 @@ class Database:
         return Database._recipes
 
     @staticmethod
-    def create_user(nickname, password):
-        user_exists = Database.users_collection().find_one({'nickname': nickname})
-        if user_exists:
-            return False, user_exists
-        new_user = User(nickname=nickname, password=password)
-        Database.users_collection().insert_one(new_user.__dict__)
-        return True, new_user
-
-    @staticmethod
-    def get_free_user_id():
+    def get_free_id(collection):
         while True:
-            user_id = random.randrange(100000, 1000000)
-            if not Database.users_collection().find_one({'user_id': user_id}):
-                return user_id
+            free_id = random.randrange(100000, 1000000)
+            if collection.find().where('this.user_id == {0} || this.recipe_id == {0}'.format(free_id)).count() == 0:
+                return free_id
