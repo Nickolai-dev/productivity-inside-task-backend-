@@ -244,29 +244,35 @@ async def explore_recipes(request):
     session = await aiohttp_session.get_session(request)
     data = await request.post()
     admin = Database.users_collection().find_one({'user_id': session['user_id']}).get('isAdmin')
-    all_recipes_count = Database.recipes_collection().count_documents(
-        ({'status': 'active'} if admin else {}))  # admin can see locked
+
     get_from, get_to = int(request.query.get('from', '0')), int(request.query.get('to', '10'))
     skip, limit = get_from, get_to - get_from
     limit = limit if limit > 0 else 1
     sort_opt, filter_opt = RequestValidator.sort_filter_options(data)
+    if not admin:  # admin can see locked
+        filter_opt.update({'status': 'active'})
+    projection = ['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
+                  'likes', 'likes_total', 'type',
+                  # 'image_bytes' # Too big data for search; it is better to do thumbnails TODO thumbnails
+                  # or simply do not pass megabytes of full image
+                  ]
     cursor = Database.recipes_collection().find(
         filter_opt,
-        projection=['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
-                    'likes', 'likes_total', 'image_bytes'],
+        projection=projection,
         sort=sort_opt, skip=skip, limit=limit)
-    recipes_list = list(map(lambda item: dict(filter(lambda item: item[0] in [
-        'author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
-        'likes', 'likes_total', 'image_bytes'], item.items())), cursor))
+    recipes_list = list(map(lambda item: dict(filter(lambda item: item[0] in projection, item.items())), cursor))
+    all_recipes_count = Database.recipes_collection().find(filter_opt, projection=projection).count()
 
     def encode_imagebytes(recipe):
-        recipe['image_base64_encoded_bytes'] = base64.encodebytes(
-            recipe['image_bytes']).decode('utf-8') if recipe['image_bytes'] else None
-        del recipe['image_bytes']
-    list(map(encode_imagebytes, recipes_list))
+        # recipe['image_base64_encoded_bytes'] = base64.encodebytes(
+        #     recipe['image_bytes']).decode('utf-8') if recipe['image_bytes'] else None
+        # del recipe['image_bytes']
+        pass
+    map(encode_imagebytes, recipes_list)
     return web.json_response({
         'name': 'OK',
-        'message': 'list of filtered and sorted recipes{0}'.format('; (if you are admin you can see locked)' if admin else ''),
+        'message': 'list of filtered and sorted recipes{0}'.format(
+            '; (if you are admin you can see locked)' if admin else ''),
         'collection': recipes_list,
         'total_recipes_count': all_recipes_count
     })

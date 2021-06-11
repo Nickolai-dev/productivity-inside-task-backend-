@@ -9,6 +9,7 @@ import time
 class DatabaseUpdateException(Exception):
     pass
 
+
 class User:
     _PASSWORD_SALT = 'super secret'
 

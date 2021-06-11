@@ -62,22 +62,26 @@ class RequestValidator:
 
     @staticmethod
     def sort_filter_options(post_data):
+        sort_by = post_data.get('sort_by')
+        sort_by = sort_by.decode('utf-8') if sort_by else None
         sort_opts = {
             'title': [('title', pymongo.ASCENDING)],
             'likes': [('likes_total', pymongo.ASCENDING)],
             'date_ascending': [('date', pymongo.ASCENDING)],
             'date_descending': [('date', pymongo.DESCENDING)],
-        }[post_data.get('sort_by')]
+            None: []
+        }[sort_by]
         filter_opts = {}
-        if post_data.get('type_filter'):
-            filter_opts.update({'type': post_data.get('type_filter').decode('utf-8')})
+        filter_type = list(filter(lambda x: x, map(lambda tp: tp.decode('utf-8'), post_data.getall('type_filter', []))))
+        if filter_type:
+            filter_opts.update({'type': {'$in': filter_type}})
         if post_data.get('title_filter'):
             filter_opts.update({'title': {
                 '$regex': re.compile(post_data.get('title_filter').decode('utf-8'), re.IGNORECASE)}})
         if post_data.get('author_filter'):
-            filter_opts.update({'title': {
+            filter_opts.update({'author': {
                 '$regex': re.compile(post_data.get('author_filter').decode('utf-8'), re.IGNORECASE)}})
-        filter_hashtags = list(filter(lambda hashtag: hashtag, post_data.getall('hashtag_filter', [])))
+        filter_hashtags = list(filter(lambda x: x,map(lambda tag: tag.decode('utf-8'), post_data.getall('hashtag_filter', []))))
         if filter_hashtags:
             filter_opts.update({'hashtags': {'$in': filter_hashtags}})
         if post_data.get('image_filter'):
