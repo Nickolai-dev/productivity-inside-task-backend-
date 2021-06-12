@@ -403,6 +403,22 @@ async def user_favorites(request, session, current_user):
     }, status=200)
 
 
+@protect
+@protect_for_user
+async def user_rename(request, session, user):
+    data = await request.post()
+    new_nickname, errors = RequestValidator.validate_single_string('new_nickname', data)
+    if errors:
+        return RequestValidator.error_response(errors)
+    Database.users_collection().update_one({'user_id': user.get('user_id')}, [
+        {'$set': {'nickname': new_nickname}}
+    ])
+    return web.json_response({
+        'name': 'Reset content',
+        'message': 'new nickname set',
+    }, status=205)
+
+
 async def hello(request):
     print(request)
     with open('./spec.json') as fp:
@@ -441,6 +457,7 @@ async def make_app():
         web.put('/signin', sign_in),
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
         web.get(r'/profile/{user_id:\d+}', no_cache(user_profile)),
+        web.post(r'/profile/{user_id:\d+}/rename', user_rename),
         web.get(r'/profile/{user_id:\d+}/favorites', no_cache(user_favorites)),
         web.get(r'/recipes/{recipe_id:\d+}', no_cache(get_recipe)),
         web.post('/peoples', explore_peoples),
