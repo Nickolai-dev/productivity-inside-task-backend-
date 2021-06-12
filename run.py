@@ -1,11 +1,10 @@
 # encoding: utf-8
 from aiohttp import web
 import json
-import hashlib
+import os
 from models import User, Recipe, Database, DatabaseUpdateException
 from validator import RequestValidator
 
-import time
 import base64
 from cryptography import fernet
 import aiohttp_session
@@ -75,6 +74,7 @@ async def delete_user(request, session, user):
     user_id = int(request.match_info.get('user_id'))
     deleted = Database.users_collection().delete_one({'user_id': user_id})
     if deleted.deleted_count > 0:
+        session.invalidate()
         return web.json_response({
             'name': 'Deleted',
             'message': 'User {0} deleted successfully'
@@ -104,7 +104,7 @@ async def sign_in(request):
         return web.json_response({
             'name': 'User validation failed',
             'message': 'nickname does not match syntax, nickname must consist of latin letters, digits and spaces'
-        }, status=422)
+        }, status=400)
     Database.users_collection().insert_one(user.__dict__)
     return web.json_response({
         'name': 'Created',
@@ -161,18 +161,24 @@ async def user_profile(request, session, current_user):
         'message': 'user profile info',
     }
     response.update(dict(filter(lambda item: item[0] in [
-        'user_id', 'nickname', 'status', 'recipes_total'] + (['favorites', 'recipes']
+        'user_id', 'nickname', 'status', 'recipes_total', 'likes_total'] + (['favorites', 'recipes']
         if current_user.get('user_id') == user_id or current_user.get('isAdmin') else []), user.items())))
     return web.json_response(response, status=200)
 
 
 @protect
 async def explore_peoples(request, session, user):
+    data = await request.post()
+    sort_by = data.get('sort_by')
+    if type(sort_by) in [bytes, bytearray]:
+        sort_by = sort_by.decode('utf-8')
+    if sort_by not in ['recipes_total', 'likes_total']:
+        sort_by = 'recipes_total'
     peoples = [user for user in Database.users_collection().find(
-        limit=10, projection=['user_id', 'nickname', 'status', 'recipes_total'],
-        filter={'status': 'active'} if not user.get('isAdmin') else {}, sort=[('recipes_total', -1)])]
+        limit=10, projection=['user_id', 'nickname', 'status', 'recipes_total', 'likes_total'],
+        filter={'status': 'active'} if not user.get('isAdmin') else {}, sort=[(sort_by, -1)])]
     peoples_reduced = list(map(lambda item: dict(filter(lambda item: item[0] in [
-        'user_id', 'nickname', 'status', 'recipes_total'], item.items())), peoples))
+        'user_id', 'nickname', 'status', 'recipes_total', 'likes_total'], item.items())), peoples))
     response = {
         'name': 'OK',
         'message': 'list of famous ramsy',
@@ -231,7 +237,7 @@ async def recipe_delete(request, session, user):
     if recipe.author_id != int(session['user_id']):
         return web.json_response({
             'name': 'Forbidden',
-            'message': 'you cannot deelte recipe you don`t own'
+            'message': 'you cannot delete recipe you doesnt own'
         }, status=403)
     user = User(**user)
     try:
@@ -449,8 +455,13 @@ async def make_app():
     fernet_key = fernet.Fernet.generate_key()
     secret_key = base64.urlsafe_b64decode(fernet_key)
     aiohttp_session.setup(app, EncryptedCookieStorage(secret_key, max_age=3600))
+    admin = User(nickname=os.environ.get('RS_ADMIN_NAME', 'admin'),
+                 password=os.environ.get('RS_ADMIN_PASSWORD', 'admin'))
+    admin.isAdmin = True
+    if not Database.users_collection().find_one({'nickname': admin.nickname}):
+        Database.users_collection().insert_one(admin.__dict__)
     app.add_routes([
-        web.get('/', hello),
+        web.get('/', no_cache(hello)),
         web.get('/favicon.ico', favicon),
         web.post('/auth', session_generate),
         web.post('/logout', logout),

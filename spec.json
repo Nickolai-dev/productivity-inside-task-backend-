@@ -1,27 +1,787 @@
 {
-  "openapi": "3.0.3",
+  "format": "free",
   "info": {
     "version": "0.0.0alpha",
     "title": "Recipes social site",
     "license": {
       "name": "MIT"
-    }
-  },
-  "servers": [],
-  "paths": {
-    "/auth": {
-      "post": {
-        "description": "authorization",
-        "parameters": [],
-        "responses": {
+    },
+    "servers": [
+      {
+        "url": "http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/"
+      }
+    ],
+    "paths": {
+      "/auth": {
+        "description": "authentication for existing users",
+        "methods": ["post"],
+        "body": "multipart/form-data",
+        "parameters": {
+          "password": {
+            "type": "string",
+            "required": true
+          },
+          "nickname": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "response": {
           "200": {
-            "description": "OK"
+            "headers": [
+              {
+                "Set-Cookie": {
+                  "name": "AIOHTTP_SESSION",
+                  "description": "user session encrypted via fernet-32-byte secret key"
+                }
+              }
+            ],
+            "body": "application/json",
+            "content": {
+              "description": "operation info"
+            }
+          },
+          "400": {
+            "description": "incorrect user or password"
           },
           "422": {
-            "description": "Parameters invalid"
+            "description": "missing fields"
+          }
+        }
+      },
+      "/logout": {
+        "description": "log out for logged in users",
+        "methods": ["post"],
+        "response": {
+          "204": {
+            "description": "success",
+            "headers": [
+              {
+                "Set-Cookie": {
+                  "name": "AIOHTTP_SESSION",
+                  "description": "user session invalidated"
+                }
+              }
+            ]
           },
-          "400":{
-            "description": "Incorrect user or password"
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "locked account"
+          }
+        }
+      },
+      "/signin": {
+        "description": "create new user",
+        "methods": ["post"],
+        "body": "multipart/form-data",
+        "parameters": {
+          "password": {
+            "type": "string",
+            "required": true
+          },
+          "nickname": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "response": {
+          "201": {
+            "description": "user created successfully"
+          },
+          "200": {
+            "description": "user already exists"
+          },
+          "400": {
+            "description": "user validation failed"
+          },
+          "422": {
+            "description": "missing fields"
+          }
+        }
+      },
+      "/profile/{user_id:\\d+}": {
+        "description": "user account info",
+        "methods": ["get"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "user profile",
+            "headers": [
+              {
+                "Cache-Control": {
+                  "name": "no-store, no-cache, must-revalidate"
+                },
+                "Pragma": {
+                  "name": "no-cache"
+                }
+              }
+            ],
+            "application/json": {
+              "user_id": {
+                "type": "integer"
+              },
+              "nickname": {
+                "type": "string"
+              },
+              "status": {
+                "type": ["locked", "active"]
+              },
+              "recipes_total": {
+                "type": "integer"
+              },
+              "likes_total": {
+                "type": "integer"
+              },
+              "favorites": {
+                "type": "array",
+                "item": {
+                  "type": "integer",
+                  "description": "recipe_id of recipe"
+                },
+                "comment": "set only if user watch his own page or if user is admin"
+              },
+              "recipes": {
+                "type": "array",
+                "item": {
+                  "type": "integer",
+                  "description": "recipe_id of recipe"
+                },
+                "comment": "set only if user watch his own page or if user is admin"
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you blocked"
+          },
+          "423": {
+            "comment": "only if current user is not admin",
+            "description": "user you trying to access is blocked"
+          },
+          "404": {
+            "description": "user not found"
+          }
+        }
+      },
+      "/profile/{user_id:\\d+}/delete": {
+        "description": "delete user",
+        "methods": ["delete"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "205": {
+            "description": "deleted successfully"
+          },
+          "200": {
+            "description": "not exists"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "user cannot delete another user"
+          }
+        }
+      },
+      "/profile/{user_id:\\d+}/rename": {
+        "description": "rename user",
+        "methods": ["post"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "205": {
+            "description": "new nickname set"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "user cannot rename another user"
+          }
+        }
+      },
+      "/profile/{user_id:\\d+}/favorites": {
+        "description": "get user favorite recipes (only caps)",
+        "methods": ["get"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "headers": [
+              {
+                "Cache-Control": {
+                  "name": "no-store, no-cache, must-revalidate"
+                },
+                "Pragma": {
+                  "name": "no-cache"
+                }
+              }
+            ],
+            "application/json": {
+              "author": {
+                "type": "string"
+              },
+              "author_id": {
+                "type": "integer"
+              },
+              "recipe_id": {
+                "type": "integer"
+              },
+              "date": {
+                "type": "float"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": ["locked", "active"]
+              },
+              "hashtags": {
+                "type": "object",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "likes": {
+                "type": "object",
+                "item": {
+                  "type": "integer"
+                }
+              },
+              "likes_total": {
+                "type": "integer"
+              },
+              "type": {
+                "type": ["first course", "second course", "drink", "salad", "dessert", "soup", "other"]
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          }
+        }
+      },
+      "/peoples": {
+        "description": "explore accounts sorted by order of total likes of each user",
+        "methods": ["post"],
+        "body": "multipart/form-data",
+        "parameters": {
+          "sort_by": {
+            "description": "sort by total likes or by total recipes",
+            "type": "string",
+            "required": false
+          }
+        },
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "application/json": {
+              "collection": {
+                "type": "array",
+                "item": {
+                  "type": "object",
+                  "user_id": {
+                    "type": "integer"
+                  },
+                  "nickname":  {
+                    "type": "string"
+                  },
+                  "status":  {
+                    "type": ["active", "locked"]
+                  },
+                  "recipes_total":  {
+                    "type": "integer"
+                  },
+                  "likes_total": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          }
+        }
+      },
+      "/recipes/explore": {
+        "description": "explore recipes with pagination",
+        "methods": ["post"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "query": {
+          "from": {
+            "type": "integer",
+            "required": true
+          },
+          "to": {
+            "type": "integer",
+            "required": true
+          }
+        },
+        "body": "multipart/form-data",
+        "parameters": {
+          "sort_by": {
+            "type": ["title", "likes", "date_descending", "date_ascending"],
+            "required": false
+          },
+          "title_filter": {
+            "type": "string",
+            "comment": "regular expression"
+          },
+          "author_filter": {
+            "type": "string",
+            "comment": "regular expression"
+          },
+          "hashtag_filter": {
+            "type": "string",
+            "comment": "multiple fields"
+          },
+          "image_filter": {
+            "type": "bool"
+          }
+        },
+        "response": {
+          "200": {
+            "application/json": {
+              "total_recipes_count": {
+                "type": "integer",
+                "description": "total of filtered and sorted"
+              },
+              "pagination": {
+                "description": "pagination options returned",
+                "type": "object",
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "collection": {
+                "type": "array",
+                "item": {
+                  "type": "object",
+                  "author": {
+                    "type": "string"
+                  },
+                  "author_id": {
+                    "type": "integer"
+                  },
+                  "recipe_id": {
+                    "type": "integer"
+                  },
+                  "date": {
+                    "type": "float"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": ["active", "locked"]
+                  },
+                  "hashtags": {
+                    "type": "array",
+                    "item": {
+                      "type": "string"
+                    }
+                  },
+                  "likes": {
+                    "type": "array",
+                    "item": {
+                      "type": "integer"
+                    }
+                  },
+                  "likes_total": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          }
+        }
+      },
+      "/recipes/{recipe_id:\\d+}": {
+        "description": "get complete recipe data",
+        "methods": ["get"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "headers": [
+              {
+                "Cache-Control": {
+                  "name": "no-store, no-cache, must-revalidate"
+                },
+                "Pragma": {
+                  "name": "no-cache"
+                }
+              }
+            ],
+            "application/json": {
+              "author": {
+                "type": "string"
+              },
+              "author_id": {
+                "type": "integer"
+              },
+              "recipe_id": {
+                "type": "integer"
+              },
+              "date": {
+                "type": "float"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "status": {
+                "type": ["active", "locked"]
+              },
+              "hashtags": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "likes": {
+                "type": "array",
+                "item": {
+                  "type": "integer"
+                }
+              },
+              "likes_total": {
+                "type": "integer"
+              },
+              "steps": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "image_base64_encoded_bytes": {
+                "type": "string",
+                "format": "base64",
+                "comment": "base64-encoded bytes of image"
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          },
+          "404": {
+            "description": "recipe not found"
+          }
+        }
+      },
+      "/recipes/{recipe_id:\\d+}/like": {
+        "description": "like recipe and add to favorites",
+        "methods": ["post"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "recipe liked"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          },
+          "404": {
+            "description": "recipe not found"
+          }
+        }
+      },
+      "/recipes/create": {
+        "description": "create new recipe",
+        "methods": ["put"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "body": "multipart/form-data",
+        "parameters": {
+          "recipe_hashtag": {
+            "type": "string",
+            "comment": "multiple fields",
+            "required": false
+          },
+          "recipe_title": {
+            "type": "string",
+            "required": true,
+            "comment": "alphanumeric chars only"
+          },
+          "recipe_type": {
+            "type": ["first course", "second course", "drink", "salad", "dessert", "soup", "other"],
+            "required": false
+          },
+          "recipe_description": {
+            "type": "string",
+            "required": true
+          },
+          "recipe_step\\d+": {
+            "type": "string",
+            "comment": "multiple fields with number postfix; at least one field required",
+            "required": true
+          },
+          "recipe_image": {
+            "type": "string",
+            "format": "bytes",
+            "comment": "raw bytes of image",
+            "required": false
+          }
+        },
+        "response": {
+          "201": {
+            "description": "recipe created"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you locked"
+          },
+          "422": {
+            "description": "missed fields or recipe validation failed"
+          }
+        }
+      },
+      "/recipes/{recipe_id:\\d+}/update": {
+        "description": "update user`s own recipe",
+        "methods": ["put"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "body": "multipart/form-data",
+        "parameters": {
+          "recipe_hashtag": {
+            "type": "string",
+            "comment": "multiple fields",
+            "required": false
+          },
+          "recipe_title": {
+            "type": "string",
+            "required": false,
+            "comment": "alphanumeric chars only"
+          },
+          "recipe_type": {
+            "type": ["first course", "second course", "drink", "salad", "dessert", "soup", "other"],
+            "required": false
+          },
+          "recipe_description": {
+            "type": "string",
+            "required": false
+          },
+          "recipe_step\\d+": {
+            "type": "string",
+            "comment": "multiple fields with number postfix; at least one field required",
+            "required": false
+          },
+          "recipe_image": {
+            "type": "string",
+            "format": "bytes",
+            "comment": "raw bytes of image",
+            "required": false
+          }
+        },
+        "response": {
+          "200": {
+            "description": "recipe updated"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "you cannot modify recipe you doesent own, or you locked; see message"
+          },
+          "422": {
+            "description": "missed fields or recipe validation failed"
+          }
+        }
+      },
+      "/recipes/{recipe_id:\\d+}/delete": {
+        "description": "delete user owned recipe and all data linked with it",
+        "methods": ["delete"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "response": {
+          "204": {
+            "description": "recipe has deleted"
+          },
+          "200": {
+            "description": "recipe doesnt exist"
+          },
+          "403": {
+            "description": "you cannot delete recipe you doesnt own, or you locked; see message"
+          },
+          "401": {
+            "description": "unauthorized"
+          }
+        }
+      },
+      "/admin/block-user/{user_id:\\d+}": {
+        "description": "for admin; block user temporarily",
+        "methods": ["post"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "body": "multipart/form-data",
+        "parameters": {
+          "set_status": {
+            "type": ["locked", "active"],
+            "required": true
+          }
+        },
+        "response": {
+          "205": {
+            "description": "status set"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "403": {
+            "description": "you are not admin or locked; see message"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "422": {
+            "description": "missed fields"
+          }
+        }
+      },
+      "/admin/block-recipe/{recipe_id:\\d+}": {
+        "description": "for admin; block recipe temporarily",
+        "methods": ["post"],
+        "headers": [
+          {
+            "Cookie": {
+              "name": "AIOHTTP_SESSION",
+              "description": "user session encrypted via fernet-32-byte secret key"
+            }
+          }
+        ],
+        "body": "multipart/form-data",
+        "parameters": {
+          "set_status": {
+            "type": ["locked", "active"],
+            "required": true
+          }
+        },
+        "response": {
+          "205": {
+            "description": "status set"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "403": {
+            "description": "you are not admin or locked; see message"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "422": {
+            "description": "missed fields"
           }
         }
       }

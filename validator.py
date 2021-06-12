@@ -14,7 +14,7 @@ class RequestValidator:
                 'message': 'you must fill {0} field'.format(field_name)
             }]
             return None, errors
-        if field_value:
+        if type(field_value) in [bytes, bytearray]:
             field_value = field_value.decode('utf-8')
         return field_value if optional else (field_value, prev_errors)
 
@@ -31,7 +31,7 @@ class RequestValidator:
                     'message': 'you must (multiply) fill {0} field'.format(field_name)
                 }]
                 return None, errors
-        decoded_values = list(map(lambda b: b.decode('utf-8'), values))
+        decoded_values = list(map(lambda b: (b.decode('utf-8') if type(b) in [bytes, bytearray] else b), values))
         return decoded_values if optional else (decoded_values, prev_errors)
 
     @staticmethod
@@ -46,7 +46,7 @@ class RequestValidator:
                     'message': 'you must fill almost 1 recipe step field'
                 }]
                 return None, errors
-            if step_value:
+            if type(step_value) in [bytes, bytearray]:
                 steps.append(step_value.decode('utf-8'))
             else:
                 break
@@ -63,7 +63,7 @@ class RequestValidator:
     @staticmethod
     def sort_filter_options(post_data):
         sort_by = post_data.get('sort_by')
-        sort_by = sort_by.decode('utf-8') if sort_by else None
+        sort_by = sort_by.decode('utf-8') if type(sort_by) in [bytes, bytearray] else sort_by
         sort_opts = {
             'title': [('title', pymongo.ASCENDING)],
             'likes': [('likes_total', pymongo.DESCENDING)],
@@ -72,17 +72,19 @@ class RequestValidator:
             None: []
         }[sort_by]
         filter_opts = {}
-        filter_type = list(filter(lambda x: x, map(lambda tp: tp.decode('utf-8'), post_data.getall('type_filter', []))))
+        filter_type = list(filter(lambda x: x, map(lambda tp: (tp.decode('utf-8') if type(tp) in [bytes, bytearray] else tp), post_data.getall('type_filter', []))))
         if filter_type:
             filter_opts.update({'type': {'$in': filter_type}})
-        if post_data.get('title_filter'):
+        title_filter = post_data.get('title_filter')
+        if title_filter:
             filter_opts.update({'title': {
-                '$regex': re.compile(post_data.get('title_filter').decode('utf-8'), re.IGNORECASE)}})
-        if post_data.get('author_filter'):
+                '$regex': re.compile(title_filter.decode('utf-8') if type(title_filter) in [bytes, bytearray] else title_filter, re.IGNORECASE)}})
+        author_filter = post_data.get('author_filter')
+        if author_filter:
             filter_opts.update({'author': {
-                '$regex': re.compile(post_data.get('author_filter').decode('utf-8'), re.IGNORECASE)}})
+                '$regex': re.compile(author_filter.decode('utf-8') if type(author_filter) in [bytes, bytearray] else author_filter, re.IGNORECASE)}})
         filter_hashtags = list(filter(
-            lambda x: x, map(lambda tag: tag.decode('utf-8'), post_data.getall('hashtag_filter', []))))
+            lambda x: x, map(lambda tag: (tag.decode('utf-8') if type(tag) in [bytes, bytearray] else tag), post_data.getall('hashtag_filter', []))))
         if filter_hashtags:
             filter_opts.update({'hashtags': {'$in': filter_hashtags}})
         if post_data.get('image_filter'):
