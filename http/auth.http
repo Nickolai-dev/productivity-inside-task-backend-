@@ -33,9 +33,3 @@ Accept: */*
 Cache-Control: no-cache
 
 ###
-
-POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/test
-Accept: */*
-Cache-Control: no-cache
-
-###

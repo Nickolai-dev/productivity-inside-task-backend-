@@ -4,38 +4,31 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 --WebAppBoundary
 Content-Disposition: form-data; name="nickname"
 
-Jo Johnson
+John Doe
 --WebAppBoundary
 Content-Disposition: form-data; name="password"
 
-jo
+12345
 --WebAppBoundary--
 
 ###
 
-POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/admin/block-user/422227
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
-Content-Disposition: form-data; name="sort_by"
+Content-Disposition: form-data; name="set_status"
 
-likes
+locked
 --WebAppBoundary--
-
-###
-POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=10&to=20
 ###
 
-POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/admin/block-recipe/919681
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
-Content-Disposition: form-data; name="sort_by"
+Content-Disposition: form-data; name="set_status"
 
-title
---WebAppBoundary
-Content-Disposition: form-data; name="image_filter"
-
-on
+locked
 --WebAppBoundary--
 ###

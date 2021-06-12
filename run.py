@@ -13,14 +13,14 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 
 def admin_only(handler):
-    async def new_handler(request):
-        session = await aiohttp_session.get_session(request)
+    async def new_handler(*args, **kwargs):
+        session = await aiohttp_session.get_session(args[0])
         if not Database.users_collection().find_one({'user_id': session['user_id']}).get('isAdmin'):
             return web.json_response({
                 'name': 'Forbidden',
                 'message': 'insufficient rights to the resource'
             }, status=403)
-        return await handler(request)
+        return await handler(*args, **kwargs)
     return new_handler
 
 
@@ -60,7 +60,7 @@ def protect(handler):
                 'message': 'your request was made with invalid credentials'
             }, status=401)
         user = Database.users_collection().find_one({'user_id': int(session['user_id'])})
-        if user.get('status') is 'locked':
+        if user.get('status') == 'locked':
             return web.json_response({
                 'name': 'Forbidden',
                 'message': 'your account has been locked'
@@ -170,7 +170,7 @@ async def user_profile(request, session, current_user):
 async def explore_peoples(request, session, user):
     peoples = [user for user in Database.users_collection().find(
         limit=10, projection=['user_id', 'nickname', 'status', 'recipes_total'],
-        filter={'status': 'active'}, sort=[('recipes_total', -1)])]
+        filter={'status': 'active'} if not user.get('isAdmin') else {}, sort=[('recipes_total', -1)])]
     peoples_reduced = list(map(lambda item: dict(filter(lambda item: item[0] in [
         'user_id', 'nickname', 'status', 'recipes_total'], item.items())), peoples))
     response = {
@@ -306,14 +306,42 @@ async def get_recipe(request, session, user, recipe):
 
 @protect
 @admin_only
-async def block_user(request):
-    return web.json_response({})
+async def block_user(request, session, admin):
+    data = await request.post()
+    status, errors = RequestValidator.validate_single_string('set_status', data)
+    user = Database.users_collection().find_one({'user_id': int(request.match_info.get('user_id'))})
+    if status not in ['locked', 'active']:
+        return web.json_response({
+            'name': 'Bad request',
+            'message': 'incorrect request'
+        }, status=400)
+    Database.users_collection().update_one({'user_id': user.get('user_id')}, [{
+        '$set': {'status': status}
+    }])
+    return web.json_response({
+        'name': 'OK',
+        'message': 'for user {0} set status {1}'.format(user.get('nickname'), status)
+    }, status=205)
 
 
 @protect
 @admin_only
-async def block_recipe(request):
-    return web.json_response({})
+async def block_recipe(request, session, admin):
+    data = await request.post()
+    status, errors = RequestValidator.validate_single_string('set_status', data)
+    recipe = Database.recipes_collection().find_one({'recipe_id': int(request.match_info.get('recipe_id'))})
+    if status not in ['locked', 'active']:
+        return web.json_response({
+            'name': 'Bad request',
+            'message': 'incorrect request'
+        }, status=400)
+    Database.recipes_collection().update_one({'recipe_id': recipe.get('recipe_id')}, [{
+        '$set': {'status': status}
+    }])
+    return web.json_response({
+        'name': 'OK',
+        'message': 'for recipe {0} set status {1}'.format(recipe.get('title'), status)
+    }, status=205)
 
 
 @protect
@@ -357,6 +385,13 @@ async def explore_recipes(request, session, user):
     })
 
 
+@protect
+async def user_favorites(request, session, user):
+    favorites = user.get('favorites')
+    Database.recipes_collection().find({})
+    return web.json_response({})
+
+
 async def hello(request):
     print(request)
     with open('./spec.json') as fp:
@@ -395,6 +430,7 @@ async def make_app():
         web.put('/signin', sign_in),
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
         web.get(r'/profile/{user_id:\d+}', no_cache(user_profile)),
+        web.get(r'/profile/{user_id:\d+}/favorites', no_cache(user_favorites)),
         web.get(r'/recipes/{recipe_id:\d+}', no_cache(get_recipe)),
         web.post('/peoples', explore_peoples),
         web.put('/recipes/create', recipe_create),
@@ -402,8 +438,8 @@ async def make_app():
         web.delete(r'/recipes/{recipe_id:\d+}/delete', recipe_delete),
         web.put(r'/recipes/{recipe_id:\d+}/update', recipe_update),
         web.post(r'/recipes/{recipe_id:\d+}/like', recipe_like),
-        web.post('/admin/block-user', block_user),
-        web.post('/admin/block-recipe', block_recipe),
+        web.post(r'/admin/block-user/{user_id:\d+}', block_user),
+        web.post(r'/admin/block-recipe/{recipe_id:\d+}', block_recipe),
     ])
     return app
 
