@@ -38,14 +38,20 @@ def protect_for_user(handler):
 
 
 def protect(handler):
-    async def new_handler(request):
+    async def new_handler(request, **kwargs):
         session = await aiohttp_session.get_session(request)
         if 'user_id' not in session:
             return web.json_response({
                 'name': 'Unauthorized',
                 'message': 'your request was made with invalid credentials'
             }, status=401)
-        return await handler(request)
+        user = Database.users_collection().find_one({'user_id': int(session['user_id'])})
+        if user.get('status') is 'locked':
+            return web.json_response({
+                'name': 'Forbidden',
+                'message': 'your account has been locked'
+            }, status=403)
+        return await handler(request, **kwargs)
     return new_handler
 
 
@@ -168,28 +174,18 @@ async def explore_peoples(request):
 async def recipe_create(request):
     data = await request.post()
     recipe_title, errors = RequestValidator.validate_single_string('recipe_title', data, [])
+    if errors:
+        return RequestValidator.error_response(errors)
     if Database.recipes_collection().find_one({'title': recipe_title}):
         return web.json_response({
             'name': 'OK',
             'message': 'recipe {0} already exists'.format(recipe_title),
         }, status=200)
-    recipe_description, errors = RequestValidator.validate_single_string('recipe_description', data, errors)
-    recipe_steps, errors = RequestValidator.validate_recipe_steps(data, errors)
-    if errors:
-        return RequestValidator.error_response(errors)
     session = await aiohttp_session.get_session(request)
     user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
-    image_bytes = data.get('recipe_image').file.read() if data.get('recipe_image') else None
-    recipe_options = {
-        'author_id': user.user_id,
-        'author': user.nickname,
-        'image_bytes': bytes(image_bytes) if image_bytes else None,
-        'hashtags': RequestValidator.validate_array_string('recipe_hashtag', data, [], optional=True) or [],
-        'type': RequestValidator.validate_single_string('recipe_type', data, optional=True) or 'other',
-        'title': recipe_title,
-        'description': recipe_description,
-        'steps': recipe_steps
-    }
+    recipe_options, errors = RequestValidator.recipe_options(data, user)
+    if errors:
+        return RequestValidator.error_response(errors)
     try:
         recipe = Recipe(**recipe_options)
     except AssertionError:
@@ -214,12 +210,51 @@ async def recipe_create(request):
 
 @protect
 async def recipe_delete(request):
-    return web.json_response({})
+    session = await aiohttp_session.get_session(request)
+    recipe_id = int(request.match_info.get('recipe_id'))
+    recipe = Database.recipes_collection().find_one({'recipe_id': recipe_id})
+    if not recipe:
+        return web.json_response({
+            'name': 'OK',
+            'message': 'recipe doesnt exist'
+        }, status=200)
+    if recipe.get('author_id') != int(session['user_id']):
+        return web.json_response({
+            'name': 'Forbidden',
+            'message': 'you cannot deelte recipe you don`t own'
+        }, status=403)
+    Database.recipes_collection().delete_one({'recipe_id': recipe_id})
+    return web.json_response({
+        'name': 'No content',
+        'message': 'recipe has deleted'
+    }, status=204)
 
 
 @protect
 async def recipe_update(request):
-    return web.json_response({})
+    recipe_id = int(request.match_info.get('recipe_id'))
+    if not Database.recipes_collection().find_one({'recipe_id': recipe_id}):
+        return web.json_response({
+            'name': 'Not found',
+            'message': 'recipe not found'
+        }, status=404)
+    session = await aiohttp_session.get_session(request)
+    data = await request.post()
+    user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
+    if recipe_id not in user.recipes:
+        return web.json_response({
+            'name': 'Forbidden',
+            'message': 'you cannot modify recipe you doesnt own'
+        }, status=403)
+    recipe_options, errors = RequestValidator.recipe_options(data, user, optional_all=True)
+    set_recipe_options = list(map(lambda t: {t[0]: t[1]},
+                                  (map(lambda option: ('$set', {option[0]: option[1]}),
+                                       recipe_options.items()))))
+    Database.recipes_collection().update_one({'recipe_id': recipe_id}, set_recipe_options)
+    return web.json_response({
+        'name': 'OK',
+        'message': 'recipe updated'
+    }, status=200)
 
 
 @protect
@@ -300,7 +335,11 @@ async def explore_recipes(request):
         'message': 'list of filtered and sorted recipes{0}'.format(
             '; (if you are admin you can see locked)' if admin else ''),
         'collection': recipes_list,
-        'total_recipes_count': all_recipes_count
+        'total_recipes_count': all_recipes_count,
+        'pagination': {
+            'from': get_from,
+            'to': get_to,
+        },
     })
 
 
@@ -316,6 +355,19 @@ async def favicon(request):
     })
 
 
+def no_cache(handler):
+    async def new_handler(request):
+        response = await handler(request)
+        # if type(response.headers) is not dict:
+        #     response.headers = {}
+        response.headers.update({
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
+            'Pragma': 'no-cache'
+        })
+        return response
+    return new_handler
+
+
 async def make_app():
     app = web.Application()
     fernet_key = fernet.Fernet.generate_key()
@@ -328,9 +380,9 @@ async def make_app():
         web.post('/logout', logout),
         web.put('/signin', sign_in),
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
-        web.get(r'/profile/{user_id:\d+}', user_profile),
-        web.get(r'/recipes/{recipe_id:\d+}', get_recipe),
-        web.get('/peoples', explore_peoples),
+        web.get(r'/profile/{user_id:\d+}', no_cache(user_profile)),
+        web.get(r'/recipes/{recipe_id:\d+}', no_cache(get_recipe)),
+        web.post('/peoples', explore_peoples),
         web.put('/recipes/create', recipe_create),
         web.post('/recipes/explore', explore_recipes),
         web.delete(r'/recipes/{recipe_id:\d+}/delete', recipe_delete),

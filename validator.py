@@ -40,10 +40,10 @@ class RequestValidator:
         for i in range(1, 100):
             step_name = fields_prefix_name + str(i)
             step_value = post_data.get(step_name)
-            if i in [1, 2] and not step_value:  # min two steps
+            if i == 1 and not step_value:  # min one step
                 errors = (prev_errors or []) + [{
                     'field': step_name,
-                    'message': 'you must fill almost 2 recipe step fields'
+                    'message': 'you must fill almost 1 recipe step field'
                 }]
                 return None, errors
             if step_value:
@@ -81,9 +81,35 @@ class RequestValidator:
         if post_data.get('author_filter'):
             filter_opts.update({'author': {
                 '$regex': re.compile(post_data.get('author_filter').decode('utf-8'), re.IGNORECASE)}})
-        filter_hashtags = list(filter(lambda x: x,map(lambda tag: tag.decode('utf-8'), post_data.getall('hashtag_filter', []))))
+        filter_hashtags = list(filter(
+            lambda x: x, map(lambda tag: tag.decode('utf-8'), post_data.getall('hashtag_filter', []))))
         if filter_hashtags:
             filter_opts.update({'hashtags': {'$in': filter_hashtags}})
         if post_data.get('image_filter'):
             filter_opts.update({'image_bytes': {'$ne': None}})
         return sort_opts, filter_opts
+
+    @staticmethod
+    def recipe_options(post_data, user, optional_all=False):
+        recipe_title, errors = RequestValidator.validate_single_string('recipe_title', post_data, [])
+        recipe_description, errors = RequestValidator.validate_single_string('recipe_description', post_data, errors)
+        recipe_steps, errors = RequestValidator.validate_recipe_steps(post_data, errors)
+        if errors and not optional_all:
+            return None, errors
+        image_bytes = post_data.get('recipe_image').file.read() if post_data.get('recipe_image') else None
+        recipe_options = {
+            'author_id': user.user_id,
+            'author': user.nickname,
+            'hashtags': RequestValidator.validate_array_string('recipe_hashtag', post_data, [], optional=True) or [],
+            'type': RequestValidator.validate_single_string('recipe_type', post_data, optional=True) or 'other',
+            'title': recipe_title,
+            'description': recipe_description,
+            'steps': recipe_steps
+        }
+        if optional_all:
+            recipe_options = dict(filter(lambda i: i[1], recipe_options.items()))
+        if image_bytes or (not image_bytes and not optional_all):
+            recipe_options.update({
+                'image_bytes': bytes(image_bytes) if image_bytes else None,
+            })
+        return recipe_options, errors

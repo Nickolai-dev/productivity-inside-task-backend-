@@ -1,0 +1,38 @@
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="nickname"
+
+Jo Johnson
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
+
+jo
+--WebAppBoundary--
+###
+
+DELETE http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/586232/delete
+
+> {%
+    client.test("Request executed successfully", function() {
+        if(response.status === 200) {
+            client.log('no recipe');
+        }
+        client.assert(response.status === 200 || response.status === 204, "Error " + response.status);
+    });
+%}
+
+###
+DELETE http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/303584/delete
+
+> {%
+    client.test("Request executed successfully", function() {
+        if(response.status === 200) {
+            client.log('no recipe');
+        }
+        client.assert(response.status === 403 || response.status === 200, "Error " + response.status);
+    });
+%}
+
+###
