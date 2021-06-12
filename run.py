@@ -151,7 +151,7 @@ async def user_profile(request, session, current_user):
             'name': 'Not found',
             'message': 'profile you are looking for appears not to be exist'
         }, status=404)
-    if user.get('status') is 'locked' and not current_user.get('isAdmin'):
+    if user.get('status') == 'locked' and not current_user.get('isAdmin'):
         return web.json_response({
             'name': 'Locked',
             'message': 'user locked'
