@@ -66,7 +66,7 @@ class RequestValidator:
         sort_by = sort_by.decode('utf-8') if sort_by else None
         sort_opts = {
             'title': [('title', pymongo.ASCENDING)],
-            'likes': [('likes_total', pymongo.ASCENDING)],
+            'likes': [('likes_total', pymongo.DESCENDING)],
             'date_ascending': [('date', pymongo.ASCENDING)],
             'date_descending': [('date', pymongo.DESCENDING)],
             None: []

@@ -10,8 +10,7 @@ Content-Disposition: form-data; name="password"
 
 jo
 --WebAppBoundary--
-
 ###
 
-GET http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/530141
+POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/744923/like
 ###

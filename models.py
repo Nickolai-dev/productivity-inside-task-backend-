@@ -32,14 +32,35 @@ class User:
             Database.users_collection().update_one({'user_id': self.user_id}, [
                 {'$set': {'recipes': {'$concatArrays': ['$recipes', [recipe_id]]}}}
             ])
+            self.recipes.append(recipe_id)
             Database.users_collection().update_one({'user_id': self.user_id}, {
                 '$inc': {'recipes_total': 1}
+            })
+            self.recipes_total += 1
+        except Exception as e:
+            print(e)
+            raise DatabaseUpdateException
+
+    def like_recipe(self, recipe):
+        try:
+            Database.users_collection().update_one({'user_id': self.user_id}, [
+                {'$set': {'favorites': {'$concatArrays': ['$favorites', [recipe.recipe_id]]}}}
+            ])
+            self.favorites.append(recipe.recipe_id)
+            Database.recipes_collection().update_one({'recipe_id': recipe.recipe_id}, [
+                {'$set': {'likes': {'$concatArrays': ['$likes', [self.user_id]]}}}
+            ])
+            recipe.likes.append(self.user_id)
+            Database.recipes_collection().update_one({'recipe_id': recipe.recipe_id}, {
+                '$inc': {'likes_total': 1}
+            })
+            recipe.likes_total += 1
+            Database.users_collection().update_one({'user_id': recipe.author_id}, {
+                '$inc': {'likes_total': 1}
             })
         except Exception as e:
             print(e)
             raise DatabaseUpdateException
-        self.recipes_total += 1
-        self.recipes.append(recipe_id)
 
     @staticmethod
     def encrypt_password(password):
@@ -74,6 +95,22 @@ class Recipe:
         self.likes_total = kwargs.get('likes_total', 0)
         self.image_bytes = kwargs.get('image_bytes', None)
         self.validate()
+
+    def delete_recipe(self, user):
+        try:
+            Database.users_collection().update_one(
+                {'user_id': self.author_id}, {'$pull': {'recipes': self.recipe_id}})
+            user.recipes.remove(self.recipe_id)
+            Database.users_collection().update_one(
+                {'user_id': self.author_id}, {'$inc': {'likes_total': -self.likes_total}}
+            )
+            for user_id in self.likes:
+                Database.users_collection().update_one(
+                    {'user_id': user_id}, {'$pull': {'favorites': self.recipe_id}})
+            Database.recipes_collection().delete_one({'recipe_id': self.recipe_id})
+        except Exception as e:
+            print(e)
+            raise DatabaseUpdateException
 
     def validate(self):
         assert all([

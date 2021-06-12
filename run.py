@@ -24,22 +24,36 @@ def admin_only(handler):
     return new_handler
 
 
+def process_recipe_in_uri(handler):
+    async def new_handler(*args, **kwargs):
+        recipe_id = int(args[0].match_info.get('recipe_id'))
+        recipe = Database.recipes_collection().find_one({'recipe_id': recipe_id})
+        admin = args[2].get('isAdmin')
+        if not recipe or (not admin and recipe.get('status') is 'locked'):
+            return web.json_response({
+                'name': 'Not found',
+                'message': 'recipe not found'
+            }, status=404)
+        return await handler(*args, recipe, **kwargs)
+    return new_handler
+
+
 def protect_for_user(handler):
-    async def new_handler(request):
-        session = await aiohttp_session.get_session(request)
-        user_id = int(request.match_info.get('user_id'))
+    async def new_handler(*args, **kwargs):
+        session = await aiohttp_session.get_session(args[0])
+        user_id = int(args[0].match_info.get('user_id'))
         if user_id != int(session['user_id']):
             return web.json_response({
                 'name': 'Forbidden',
                 'message': 'insufficient rights to the resource'
             }, status=403)
-        return await handler(request)
+        return await handler(*args, **kwargs)
     return new_handler
 
 
 def protect(handler):
-    async def new_handler(request, **kwargs):
-        session = await aiohttp_session.get_session(request)
+    async def new_handler(*args, **kwargs):
+        session = await aiohttp_session.get_session(args[0])
         if 'user_id' not in session:
             return web.json_response({
                 'name': 'Unauthorized',
@@ -51,13 +65,13 @@ def protect(handler):
                 'name': 'Forbidden',
                 'message': 'your account has been locked'
             }, status=403)
-        return await handler(request, **kwargs)
+        return await handler(*args, session, user, **kwargs)
     return new_handler
 
 
 @protect
 @protect_for_user
-async def delete_user(request):
+async def delete_user(request, session, user):
     user_id = int(request.match_info.get('user_id'))
     deleted = Database.users_collection().delete_one({'user_id': user_id})
     if deleted.deleted_count > 0:
@@ -120,8 +134,7 @@ async def session_generate(request):
 
 
 @protect
-async def logout(request):
-    session = await aiohttp_session.get_session(request)
+async def logout(request, session, user):
     session.invalidate()
     return web.json_response({
         'name': 'OK',
@@ -130,11 +143,9 @@ async def logout(request):
 
 
 @protect
-async def user_profile(request):
-    session = await aiohttp_session.get_session(request)
+async def user_profile(request, session, current_user):
     user_id = int(request.match_info.get('user_id'))
     user = Database.users_collection().find_one({'user_id': user_id})
-    current_user = Database.users_collection().find_one({'user_id': session['user_id']})
     if not user:
         return web.json_response({
             'name': 'Not found',
@@ -156,7 +167,7 @@ async def user_profile(request):
 
 
 @protect
-async def explore_peoples(request):
+async def explore_peoples(request, session, user):
     peoples = [user for user in Database.users_collection().find(
         limit=10, projection=['user_id', 'nickname', 'status', 'recipes_total'],
         filter={'status': 'active'}, sort=[('recipes_total', -1)])]
@@ -171,7 +182,7 @@ async def explore_peoples(request):
 
 
 @protect
-async def recipe_create(request):
+async def recipe_create(request, session, user):
     data = await request.post()
     recipe_title, errors = RequestValidator.validate_single_string('recipe_title', data, [])
     if errors:
@@ -181,8 +192,7 @@ async def recipe_create(request):
             'name': 'OK',
             'message': 'recipe {0} already exists'.format(recipe_title),
         }, status=200)
-    session = await aiohttp_session.get_session(request)
-    user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
+    user = User(**user)
     recipe_options, errors = RequestValidator.recipe_options(data, user)
     if errors:
         return RequestValidator.error_response(errors)
@@ -209,8 +219,7 @@ async def recipe_create(request):
 
 
 @protect
-async def recipe_delete(request):
-    session = await aiohttp_session.get_session(request)
+async def recipe_delete(request, session, user):
     recipe_id = int(request.match_info.get('recipe_id'))
     recipe = Database.recipes_collection().find_one({'recipe_id': recipe_id})
     if not recipe:
@@ -218,12 +227,20 @@ async def recipe_delete(request):
             'name': 'OK',
             'message': 'recipe doesnt exist'
         }, status=200)
-    if recipe.get('author_id') != int(session['user_id']):
+    recipe = Recipe(**recipe)
+    if recipe.author_id != int(session['user_id']):
         return web.json_response({
             'name': 'Forbidden',
             'message': 'you cannot deelte recipe you don`t own'
         }, status=403)
-    Database.recipes_collection().delete_one({'recipe_id': recipe_id})
+    user = User(**user)
+    try:
+        recipe.delete_recipe(user)
+    except DatabaseUpdateException:
+        return web.json_response({
+            'name': 'Something went wrong',
+            'message': 'error when deleting recipe or deleting it from favorites stats: run.py -> recipe_like'
+        }, status=500)
     return web.json_response({
         'name': 'No content',
         'message': 'recipe has deleted'
@@ -231,17 +248,11 @@ async def recipe_delete(request):
 
 
 @protect
-async def recipe_update(request):
-    recipe_id = int(request.match_info.get('recipe_id'))
-    if not Database.recipes_collection().find_one({'recipe_id': recipe_id}):
-        return web.json_response({
-            'name': 'Not found',
-            'message': 'recipe not found'
-        }, status=404)
-    session = await aiohttp_session.get_session(request)
+@process_recipe_in_uri
+async def recipe_update(request, session, user, recipe):
     data = await request.post()
-    user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
-    if recipe_id not in user.recipes:
+    user = User(**user)
+    if recipe.get('recipe_id') not in user.recipes:
         return web.json_response({
             'name': 'Forbidden',
             'message': 'you cannot modify recipe you doesnt own'
@@ -250,7 +261,7 @@ async def recipe_update(request):
     set_recipe_options = list(map(lambda t: {t[0]: t[1]},
                                   (map(lambda option: ('$set', {option[0]: option[1]}),
                                        recipe_options.items()))))
-    Database.recipes_collection().update_one({'recipe_id': recipe_id}, set_recipe_options)
+    Database.recipes_collection().update_one({'recipe_id': recipe.get('recipe_id')}, set_recipe_options)
     return web.json_response({
         'name': 'OK',
         'message': 'recipe updated'
@@ -258,24 +269,28 @@ async def recipe_update(request):
 
 
 @protect
-async def recipe_like(request):
-    return web.json_response({})
+@process_recipe_in_uri
+async def recipe_like(request, session, user, recipe):
+    recipe = Recipe(**recipe)
+    user = User(**user)
+    try:
+        user.like_recipe(recipe)
+    except DatabaseUpdateException:
+        return web.json_response({
+            'name': 'Something went wrong',
+            'message': 'error when adding recipe to liked or rewriting recipe likes or author stats: run.py -> recipe_like'
+        }, status=500)
+    return web.json_response({
+        'name': 'OK',
+        'message': 'recipe liked',
+    }, status=200)
 
 
 @protect
-async def get_recipe(request):
-    session = await aiohttp_session.get_session(request)
-    recipe_id = int(request.match_info.get('recipe_id'))
+@process_recipe_in_uri
+async def get_recipe(request, session, user, recipe):
     projection = ['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
                   'likes', 'likes_total', 'type', 'image_bytes', 'steps']
-    recipe = Database.recipes_collection().find_one({'recipe_id': recipe_id}, projection=projection)
-    user = Database.users_collection().find_one({'user_id': session['user_id']})
-    admin = user.get('isAdmin')
-    if not recipe or (not admin and recipe.get('status') is 'locked'):
-        return web.json_response({
-            'name': 'Not found',
-            'message': 'recipe you are looking for appears not to be exist'
-        }, status=404)
     recipe_reduced = dict(filter(lambda item: item[0] in projection, recipe.items()))
     recipe_reduced.update({'user_status': user.get('status')})
     recipe_reduced['image_base64_encoded_bytes'] = base64.encodebytes(
@@ -302,10 +317,9 @@ async def block_recipe(request):
 
 
 @protect
-async def explore_recipes(request):
-    session = await aiohttp_session.get_session(request)
+async def explore_recipes(request, session, user):
     data = await request.post()
-    admin = Database.users_collection().find_one({'user_id': session['user_id']}).get('isAdmin')
+    admin = user.get('isAdmin')
     get_from, get_to = int(request.query.get('from', '0')), int(request.query.get('to', '10'))
     skip, limit = get_from, get_to - get_from
     limit = limit if limit > 0 else 1
@@ -356,8 +370,8 @@ async def favicon(request):
 
 
 def no_cache(handler):
-    async def new_handler(request):
-        response = await handler(request)
+    async def new_handler(*args, **kwargs):
+        response = await handler(*args, **kwargs)
         # if type(response.headers) is not dict:
         #     response.headers = {}
         response.headers.update({

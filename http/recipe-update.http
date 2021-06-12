@@ -12,7 +12,7 @@ jo
 --WebAppBoundary--
 ###
 
-PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/289608/update
+PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/530141/update
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
