@@ -33,6 +33,13 @@ Content-Disposition: form-data; name="type_filter"
 
 drink
 --WebAppBoundary--
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Error " + response.status);
+    });
+%}
+
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
@@ -59,6 +66,13 @@ Content-Disposition: form-data; name="author_filter"
 
 (ramsa?y|john|Lyel|Luis)
 --WebAppBoundary--
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
@@ -101,6 +115,13 @@ Content-Disposition: form-data; name="hashtag_filter"
 
 mushrooms
 --WebAppBoundary--
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/explore?from=0&to=10
@@ -147,4 +168,12 @@ Content-Disposition: form-data; name="title_filter"
 
 (salmon|(mu)?shrooms)
 --WebAppBoundary--
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Error " + response.status);
+    });
+%}
+
 ###

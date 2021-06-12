@@ -11,6 +11,11 @@ Content-Disposition: form-data; name="password"
 12345678910
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -25,6 +30,11 @@ Content-Disposition: form-data; name="password"
 getintotherobot
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -39,6 +49,11 @@ Content-Disposition: form-data; name="password"
 asdfghjk
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -53,6 +68,11 @@ Content-Disposition: form-data; name="password"
 kjhgfds
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -67,6 +87,11 @@ Content-Disposition: form-data; name="password"
 university
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -81,6 +106,11 @@ Content-Disposition: form-data; name="password"
 jo
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
@@ -96,6 +126,11 @@ Content-Disposition: form-data; name="password"
 12345
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
@@ -111,6 +146,11 @@ Content-Disposition: form-data; name="password"
 12345
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
@@ -126,6 +166,11 @@ Content-Disposition: form-data; name="password"
 jack
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
@@ -141,6 +186,11 @@ Content-Disposition: form-data; name="password"
 actuallygoodfood
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/signin
@@ -156,4 +206,9 @@ Content-Disposition: form-data; name="password"
 user
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201, "Error " + response.status);
+    });
+%}
 ###

@@ -17,7 +17,7 @@ PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/WaterPouringGlass_iS1172707826-1.jpg
 --WebAppBoundary
@@ -45,6 +45,12 @@ Content-Disposition: form-data; name="recipe_step_2"
 
 Enjoy the rest of your day!
 --WebAppBoundary--
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 
 ###
 
@@ -77,6 +83,11 @@ Content-Disposition: form-data; name="recipe_step_3"
 Seems, it doesent work
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -130,7 +141,7 @@ Content-Disposition: form-data; name="recipe_step_4"
 
 Serve with beacon or toast
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/omelette.png
 --WebAppBoundary
@@ -139,6 +150,11 @@ Content-Disposition: form-data; name="recipe_type"
 first course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 
@@ -189,7 +205,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Serve with lemon or onion
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/fresh-salmon-on-potatoes.jpg
 --WebAppBoundary
@@ -198,6 +214,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
@@ -232,7 +253,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Serve with vegetables
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/roasted-chicken.jpg
 --WebAppBoundary
@@ -241,6 +262,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 PUT http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/recipes/create
@@ -275,7 +301,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Serve with onion
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/herb-omelette.PNG
 --WebAppBoundary
@@ -284,6 +310,11 @@ Content-Disposition: form-data; name="recipe_type"
 first course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -330,6 +361,11 @@ Content-Disposition: form-data; name="recipe_type"
 drink
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -379,7 +415,7 @@ Content-Disposition: form-data; name="recipe_step_4"
 
 Add lettuce to taste
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/Vegetable-Pizza-Sandwich-featured.jpg
 --WebAppBoundary
@@ -388,6 +424,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -442,6 +483,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 
@@ -492,7 +538,7 @@ Content-Disposition: form-data; name="recipe_step_4"
 
 Bake on 180C by 20min
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/external-content.duckduckgo.com.jpg
 --WebAppBoundary
@@ -501,6 +547,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -546,7 +597,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Mash garlic
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/7f88a30099836d67042263d8d4738073.png
 --WebAppBoundary
@@ -555,6 +606,11 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -601,7 +657,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Profit
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/sweet-potato-quinoa-soup-picture.jpg
 --WebAppBoundary
@@ -610,6 +666,11 @@ Content-Disposition: form-data; name="recipe_type"
 soup
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###
 
 POST http://ovz6.n-solenii2016.n03kn.vps.myjino.ru:49319/auth
@@ -663,7 +724,7 @@ Content-Disposition: form-data; name="recipe_step_3"
 
 Profit
 --WebAppBoundary
-Content-Disposition: form-data; name="recipe_image"
+Content-Disposition: form-data; name="recipe_image"; filename="image"
 
 < ./img/impossible_burg_tobz.jpg
 --WebAppBoundary
@@ -672,4 +733,9 @@ Content-Disposition: form-data; name="recipe_type"
 second course
 --WebAppBoundary--
 
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200 || response.status === 201 || response.status === 204, "Error " + response.status);
+    });
+%}
 ###

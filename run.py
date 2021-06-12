@@ -27,7 +27,7 @@ def admin_only(handler):
 def protect_for_user(handler):
     async def new_handler(request):
         session = await aiohttp_session.get_session(request)
-        user_id = int(request.match_info['user_id'])
+        user_id = int(request.match_info.get('user_id'))
         if user_id != int(session['user_id']):
             return web.json_response({
                 'name': 'Forbidden',
@@ -52,7 +52,7 @@ def protect(handler):
 @protect
 @protect_for_user
 async def delete_user(request):
-    user_id = int(request.match_info['user_id'])
+    user_id = int(request.match_info.get('user_id'))
     deleted = Database.users_collection().delete_one({'user_id': user_id})
     if deleted.deleted_count > 0:
         return web.json_response({
@@ -126,13 +126,13 @@ async def logout(request):
 @protect
 async def user_profile(request):
     session = await aiohttp_session.get_session(request)
-    user_id = int(request.match_info['user_id'])
+    user_id = int(request.match_info.get('user_id'))
     user = Database.users_collection().find_one({'user_id': user_id})
     current_user = Database.users_collection().find_one({'user_id': session['user_id']})
     if not user:
         return web.json_response({
             'name': 'Not found',
-            'message': 'profile you looking for appears to be not exists'
+            'message': 'profile you are looking for appears not to be exist'
         }, status=404)
     if user.get('status') is 'locked' and not current_user.get('isAdmin'):
         return web.json_response({
@@ -168,13 +168,18 @@ async def explore_peoples(request):
 async def recipe_create(request):
     data = await request.post()
     recipe_title, errors = RequestValidator.validate_single_string('recipe_title', data, [])
+    if Database.recipes_collection().find_one({'title': recipe_title}):
+        return web.json_response({
+            'name': 'OK',
+            'message': 'recipe {0} already exists'.format(recipe_title),
+        }, status=200)
     recipe_description, errors = RequestValidator.validate_single_string('recipe_description', data, errors)
     recipe_steps, errors = RequestValidator.validate_recipe_steps(data, errors)
     if errors:
         return RequestValidator.error_response(errors)
     session = await aiohttp_session.get_session(request)
     user = User(**Database.users_collection().find_one({'user_id': session['user_id']}))
-    image_bytes = data.get('recipe_image')
+    image_bytes = data.get('recipe_image').file.read() if data.get('recipe_image') else None
     recipe_options = {
         'author_id': user.user_id,
         'author': user.nickname,
@@ -224,7 +229,29 @@ async def recipe_like(request):
 
 @protect
 async def get_recipe(request):
-    return web.json_response({})
+    session = await aiohttp_session.get_session(request)
+    recipe_id = int(request.match_info.get('recipe_id'))
+    projection = ['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
+                  'likes', 'likes_total', 'type', 'image_bytes', 'steps']
+    recipe = Database.recipes_collection().find_one({'recipe_id': recipe_id}, projection=projection)
+    user = Database.users_collection().find_one({'user_id': session['user_id']})
+    admin = user.get('isAdmin')
+    if not recipe or (not admin and recipe.get('status') is 'locked'):
+        return web.json_response({
+            'name': 'Not found',
+            'message': 'recipe you are looking for appears not to be exist'
+        }, status=404)
+    recipe_reduced = dict(filter(lambda item: item[0] in projection, recipe.items()))
+    recipe_reduced.update({'user_status': user.get('status')})
+    recipe_reduced['image_base64_encoded_bytes'] = base64.encodebytes(
+        recipe_reduced['image_bytes']).decode('utf-8').replace('\n', '') if recipe_reduced['image_bytes'] else None
+    del recipe_reduced['image_bytes']
+    response = {
+        'name': 'OK',
+        'message': 'recipe complete data'
+    }
+    response.update(recipe_reduced)
+    return web.json_response(response, status=200)
 
 
 @protect
@@ -244,7 +271,6 @@ async def explore_recipes(request):
     session = await aiohttp_session.get_session(request)
     data = await request.post()
     admin = Database.users_collection().find_one({'user_id': session['user_id']}).get('isAdmin')
-
     get_from, get_to = int(request.query.get('from', '0')), int(request.query.get('to', '10'))
     skip, limit = get_from, get_to - get_from
     limit = limit if limit > 0 else 1
@@ -303,6 +329,7 @@ async def make_app():
         web.put('/signin', sign_in),
         web.delete(r'/profile/{user_id:\d+}/delete', delete_user),
         web.get(r'/profile/{user_id:\d+}', user_profile),
+        web.get(r'/recipes/{recipe_id:\d+}', get_recipe),
         web.get('/peoples', explore_peoples),
         web.put('/recipes/create', recipe_create),
         web.post('/recipes/explore', explore_recipes),
