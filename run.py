@@ -382,14 +382,25 @@ async def explore_recipes(request, session, user):
             'from': get_from,
             'to': get_to,
         },
-    })
+    }, status=200)
 
 
 @protect
-async def user_favorites(request, session, user):
-    favorites = user.get('favorites')
-    Database.recipes_collection().find({})
-    return web.json_response({})
+async def user_favorites(request, session, current_user):
+    projection = ['author', 'author_id', 'recipe_id', 'date', 'title', 'description', 'status', 'hashtags',
+                  'likes', 'likes_total', 'type']
+    user = Database.users_collection().find_one({'user_id': int(request.match_info.get('user_id'))})
+    opts = {'recipe_id': {'$in': user.get('favorites')}}
+    if not current_user.get('isAdmin'):
+        opts.update({'status': 'active'})
+    recipes = list(Database.recipes_collection().find(opts, projection=projection))
+    recipes_reduced = list(map(
+        lambda item: dict(filter(lambda item: item[0] in projection, item.items())), recipes))
+    return web.json_response({
+        'name': 'OK',
+        'message': 'list of favorites recipes of user {0}'.format(user.get('nickname')),
+        'collection': recipes_reduced,
+    }, status=200)
 
 
 async def hello(request):
